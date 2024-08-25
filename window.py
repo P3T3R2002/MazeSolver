@@ -5,7 +5,7 @@ class Window:
         self.__root = Tk()
         self.__root.title = "Maze"
         self.__root.geometry(f"{width}x{height}")
-        self.__canvas = Canvas(self.__root, width=width, height=height)
+        self.__canvas = Canvas(self.__root, width=width, height=height, background = "white")
         self.__canvas.pack(fill="both", expand=True)
         self.__running = False
         self.__root.protocol("WM_DELETE_WINDOW", self.__close)
@@ -13,9 +13,9 @@ class Window:
     def wait_for_close(self):
         self.__running = True
         while self.__running:
-            self.__redraw()
+            self.redraw()
 
-    def __redraw(self):
+    def redraw(self):
         self.__root.update()
         self.__root.update_idletasks()
 
@@ -25,6 +25,7 @@ class Window:
     def draw(self, line, color):
         line.draw(self.__canvas, color)
 
+
 class Point:
     def __init__(self, x, y):
         self.x = x
@@ -32,6 +33,7 @@ class Point:
     
     def __repr__(self) -> str:
         return f"{self.x}:{self.y}"
+
 
 class Line:
     def __init__(self, first, second) -> None:
@@ -43,3 +45,4 @@ class Line:
 
     def __repr__(self) -> str:
         return f"{self.point_1} -> {self.point_2}"
+
