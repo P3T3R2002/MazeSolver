@@ -1,12 +1,14 @@
 from window import *
-from cell import*
+#from maze_recursion import*
+from maze_stack import*
+# import only one or the other at one time
+# they have the same Maze class name
+
 
 
 def main():
     win = Window(1600, 800)
-    maze = Maze(100, 100, 30, 70, 20, win)
-    maze.reset_try()    
-    maze.solve_r()
+    maze = Maze(100, 100, 30, 30, 20, win)
 
 
 

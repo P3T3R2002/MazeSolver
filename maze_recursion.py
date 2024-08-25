@@ -57,6 +57,7 @@ class Maze:
         self.win = win
         self.__found_exit = False
         self.__create_cells()
+        self.current = None
 
     def __create_cells(self):
         for j in range(0, self.__num_rows):
@@ -194,8 +195,8 @@ class Maze:
     def __get_next_route(self, possible_next):
         return possible_next[0]
 
-    #for mate solving
-    def solve_r(self, i = 0, j = 0, to_visit = []):
+    #for recursive maze solving
+    def __solve_r(self, i = 0, j = 0, to_visit = []):
         if self.__num_cols-1 == j and self.__num_rows-1 == i:
             self.__found_exit = True
         current = self.__cells[i][j]
@@ -209,7 +210,7 @@ class Maze:
                 case("top"):
                     self.__cells[i][j].draw_move(self.__cells[i-1][j])
                     self.__animate()
-                    self.solve_r(i-1, j, to_visit)
+                    self.__solve_r(i-1, j, to_visit)
                     if not self.__found_exit:
                         self.__cells[i][j].draw_move(self.__cells[i-1][j], True)
                         self.__animate()
@@ -218,7 +219,7 @@ class Maze:
 
                 case("bottom"):
                     self.__cells[i][j].draw_move(self.__cells[i+1][j])
-                    self.solve_r(i+1, j, to_visit)
+                    self.__solve_r(i+1, j, to_visit)
                     if not self.__found_exit:
                         self.__cells[i][j].draw_move(self.__cells[i+1][j], True)
                         self.__animate()
@@ -227,7 +228,7 @@ class Maze:
 
                 case("left"):
                     self.__cells[i][j].draw_move(self.__cells[i][j-1])
-                    self.solve_r(i, j-1, to_visit)
+                    self.__solve_r(i, j-1, to_visit)
                     if not self.__found_exit:
                         self.__cells[i][j].draw_move(self.__cells[i][j-1], True)
                         self.__animate()
@@ -236,7 +237,7 @@ class Maze:
 
                 case("right"):
                     self.__cells[i][j].draw_move(self.__cells[i][j+1])
-                    self.solve_r(i, j+1, to_visit)
+                    self.__solve_r(i, j+1, to_visit)
                     if not self.__found_exit:
                         self.__cells[i][j].draw_move(self.__cells[i][j+1], True)
                         self.__animate()
@@ -246,7 +247,11 @@ class Maze:
                     raise Exception("Problem in Maze/solve_r")    
             possible_next = self.__add_possible_routes(i, j, to_visit)
 
+    #reset visited
     def reset_try(self):      
         for i in range(0, self.__num_rows):
             for j in range(0, self.__num_cols):
                 self.__cells[i][j].visited = False
+
+    def solve_r(self):
+        self.__solve_r()
