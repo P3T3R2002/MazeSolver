@@ -7,9 +7,9 @@ from maze_stack import*
 
 
 def main():
-    win = Window(1600, 800)
-    maze = Maze(100, 100, 30, 30, 20, win)
-
+    win = Window(1800, 1000)
+    maze = Maze(100, 50, 80, 160, 10, win)
+    maze.solve()
 
 
     win.wait_for_close()

@@ -71,6 +71,7 @@ class Maze:
                                 ))
             self.__cells.append(row)
         self.__draw_cell()
+        self.__reset_try()
 
     def __draw_cell(self):
         for row in self.__cells:
@@ -248,10 +249,10 @@ class Maze:
             possible_next = self.__add_possible_routes(i, j, to_visit)
 
     #reset visited
-    def reset_try(self):      
+    def __reset_try(self):      
         for i in range(0, self.__num_rows):
             for j in range(0, self.__num_cols):
                 self.__cells[i][j].visited = False
 
-    def solve_r(self):
+    def solve(self):
         self.__solve_r()

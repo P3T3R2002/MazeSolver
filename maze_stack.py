@@ -6,7 +6,7 @@ import random
 class Cell:
     def __init__(self, x1, x2,y1, y2, win = None):
         self.__center = Point((x1+x2)/2, (y1+y2)/2)
-        self.__walls = { "right": [Line(Point(x2, y1), Point(x2, y2)), True],
+        self.walls = { "right": [Line(Point(x2, y1), Point(x2, y2)), True],
                         "bottom": [Line(Point(x1, y2), Point(x2, y2)), True],
                         "top": [Line(Point(x1, y1), Point(x2, y1)), True],
                         "left": [Line(Point(x1, y1), Point(x1, y2)), True]
@@ -20,18 +20,18 @@ class Cell:
         self.visited = False
 
     def set_wall(self, wall):
-        self.__walls[wall][1] = True
+        self.walls[wall][1] = True
 
     def delete_wall(self, wall):
-        self.__walls[wall][1] = False
+        self.walls[wall][1] = False
         self.draw()
 
     def draw(self, color = "black"):
-        for wall in self.__walls.keys():
-            if self.__walls[wall][1]:
-                self.win.draw(self.__walls[wall][0], color)
+        for wall in self.walls.keys():
+            if self.walls[wall][1]:
+                self.win.draw(self.walls[wall][0], color)
             else:
-                self.win.draw(self.__walls[wall][0], "white")
+                self.win.draw(self.walls[wall][0], "white")
 
     def draw_move(self, to_cell, undo=False):
         line = Line(self.__center, to_cell.__center)
@@ -41,7 +41,7 @@ class Cell:
             self.win.draw(line, "blue")
 
     def __repr__(self):
-        return f'{self.__walls["top"]}, {self.__walls["right"]}, {self.__walls["bottom"]}, {self.__walls["left"]}'
+        return f'{self.walls["top"]}, {self.walls["right"]}, {self.walls["bottom"]}, {self.walls["left"]}'
 
 
 class Maze:
@@ -85,8 +85,8 @@ class Maze:
         self.__reset_visited(cells)
 
     def __create_graph(self, cells):
-        for j in range(0, self.__num_rows):
-            for i in range(0, self.__num_cols):
+        for i in range(0, self.__num_rows):
+            for j in range(0, self.__num_cols):
                 current = cells[i][j]
                 if i-1 in range(0, self.__num_rows) and j in range(0, self.__num_cols):
                     current.top = cells[i-1][j]
@@ -102,7 +102,7 @@ class Maze:
 
     def __animate(self):
         self.win.redraw()
-        #time.sleep(0.05)
+        time.sleep(0.1)
 
     def __break_entrance_and_exit(self):
         temp = self.__stack[0]
@@ -128,18 +128,18 @@ class Maze:
     #for maze generation
     def __add_unvisited_neighbors(self, current):
         possible_next = []
+        if current.left is not None and not current.left.visited:
+            possible_next.append("left")
+            
         if current.top is not None and not current.top.visited:
             possible_next.append("top")
 
         if current.bottom is not None and not current.bottom.visited:
             possible_next.append("bottom")
 
-        if current.left is not None and not current.left.visited:
-            possible_next.append("left")
-
         if current.right is not None and not current.right.visited:
             possible_next.append("right")
-        
+
         if len(possible_next) == 0:
             return None
         return possible_next
@@ -150,25 +150,25 @@ class Maze:
                 case("top"):
                     self.__stack[-1].delete_wall("top")
                     self.__stack[-1].top.delete_wall("bottom")
-                    self.__animate()
+                    #self.__animate()
                     self.__stack.append(self.__stack[-1].top)
 
                 case("bottom"):
                     self.__stack[-1].delete_wall("bottom")
                     self.__stack[-1].bottom.delete_wall("top")
-                    self.__animate()
+                    #self.__animate()
                     self.__stack.append(self.__stack[-1].bottom)
 
                 case("left"):
                     self.__stack[-1].delete_wall("left")
                     self.__stack[-1].left.delete_wall("right")
-                    self.__animate()
+                    #self.__animate()
                     self.__stack.append(self.__stack[-1].left)
 
                 case("right"):
                     self.__stack[-1].delete_wall("right")
                     self.__stack[-1].right.delete_wall("left")
-                    self.__animate()
+                    #self.__animate()
                     self.__stack.append(self.__stack[-1].right)
 
                 case _:
@@ -176,8 +176,38 @@ class Maze:
         
     #reset visited
     def __reset_visited(self, cells):      
+        self.__stack = [cells[0][0]]
         for i in range(0, self.__num_rows):
             for j in range(0, self.__num_cols):
                 cells[i][j].visited = False
 
-    
+    def __solve_s(self):
+        while not self.__found_exit or len(self.__stack) == 0:
+            #self.__animate()
+            self.__stack[-1].visited = True  
+            next = self.__get_next_cell(self.__stack[-1])
+            if next is None:
+                self.__stack[-2].draw_move(self.__stack.pop(), True)
+            else:
+                self.__stack[-1].draw_move(next)
+                self.__stack.append(next)
+                if next.exit:
+                    self.__found_exit = True
+
+    def __get_next_cell(self, current):
+        if not current.walls["right"][1] and current.right is not None and not current.right.visited:
+            return current.right
+        
+        if not current.walls["bottom"][1] and current.bottom is not None and not current.bottom.visited:
+            return current.bottom
+
+        if not current.walls["left"][1] and current.left is not None and not current.left.visited:
+            return current.left
+
+        if not current.walls["top"][1] and current.top is not None and not current.top.visited:
+            return current.top
+        else:
+            return None
+
+    def solve(self):
+        self.__solve_s()
